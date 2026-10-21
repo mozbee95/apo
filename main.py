@@ -1,9 +1,8 @@
 from gpiozero import Button
-from signal import pause
 from time import sleep
-print("test\n")
 
-hangup = Button(9, pull_up=False)  # pull-up interne activé par défaut
+hangup = Button(9, pull_up=False)
+print("démarré")
 while True:
-    print("raccroché" if hangup.is_pressed else "décroché")
-    sleep(0.1)
+    print("fermé (3,3 V)" if hangup.is_pressed else "ouvert (0 V)")
+    sleep(0.2)
