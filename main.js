@@ -1,9 +1,9 @@
 // on importe les dépendances
 const five = require("johnny-five");
-const Raspi = require("raspi-io");
-
+const { RaspiIO } = require("raspi-io");
 // on déclare la board
-const board = new five.Board({ io: new Raspi() });
+
+const board = new five.Board({ io: new RaspiIO() });
 
 // Une fois la carte prête
 board.on("ready", function() {
