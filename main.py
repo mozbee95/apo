@@ -12,7 +12,7 @@ def compose_end(number):
 rotary = Rotary(on_compose_end=compose_end)
 
 # bouton qui reçoit les impulsions du cadran
-rotary_button = Button(17, pull_up=True, bounce_time=0.01)
+rotary_button = Button(17, pull_up=False, bounce_time=0.01)
 rotary_button.when_released = rotary.on_pulse
 
 # combiné
