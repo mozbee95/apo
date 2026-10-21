@@ -1,3 +1,4 @@
+# test
 import threading
 
 PULSE_TIMEOUT = 0.5    # s : temps max entre deux impulsions d'un même chiffre
