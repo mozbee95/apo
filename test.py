@@ -1,7 +1,7 @@
 from gpiozero import Button
 import time
 
-b = Button(17, pull_up=True, bounce_time=None)
+b = Button(17, pull_up=False, bounce_time=None)
 prev = b.is_pressed
 changes = 0
 print("compose un chiffre... (Ctrl+C pour arrêter)")
