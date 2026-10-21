@@ -1,6 +1,6 @@
 from gpiozero import Button
 from signal import pause
-
+from time import sleep
 print("test\n")
 
 while(1):
