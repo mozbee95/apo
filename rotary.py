@@ -15,9 +15,11 @@ class Rotary:
         self.on_compose_start = on_compose_start
         self.on_compose_end = on_compose_end
         self.lock = threading.Lock()
+        print("Rotary init")
 
     def on_pulse(self):
         # réception d'une impulsion
+        print("Impulse received")
         with self.lock:
             if self.pulse_count == 0 and self.value == "" and self.on_compose_start:
                 self.on_compose_start()
