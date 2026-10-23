@@ -4,7 +4,7 @@ import threading
 PULSE_TIMEOUT = 0.5    # s : temps max entre deux impulsions d'un même chiffre
 COMPOSE_TIMEOUT = 2.0  # s : temps avant de considérer le numéro complet
 
-PULSE_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+PULSE_VALUES = [0, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 
 class Rotary:
@@ -16,7 +16,6 @@ class Rotary:
         self.on_compose_start = on_compose_start
         self.on_compose_end = on_compose_end
         self.lock = threading.Lock()
-        print("Rotary init")
 
     def on_pulse(self):
         # réception d'une impulsion
