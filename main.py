@@ -49,8 +49,8 @@ class AsyncTelephoneController:
         # Note : Si le comportement est inversé (tonalité au raccroché), intervertissez simplement 
         # '_thread_safe_decrocher' et '_thread_safe_raccrocher' ci-dessous.
         self.crochet = Button(PIN_HOOK_SWITCH, pull_up=False, bounce_time=0.05)
-        self.crochet.when_pressed = self._thread_safe_raccrocher
-        self.crochet.when_released = self._thread_safe_decrocher
+        self.crochet.when_pressed = self._thread_safe_decrocher
+        self.crochet.when_released = self._thread_safe_raccrocher
         if self.crochet.is_pressed:
             # Si le bouton est déjà détecté comme activé selon votre câblage
             self._thread_safe_decrocher()
