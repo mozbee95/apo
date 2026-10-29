@@ -2,7 +2,7 @@ import time
 import pygame
 
 pygame.mixer.pre_init(44100, -16, 2, 2048)
-pygame.mixer.init()
+pygame.mixer.init(devicename="headphones")
 
 print("Tentative de lecture forcée de la tonalité pendant 5 secondes...")
 try:
