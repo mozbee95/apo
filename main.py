@@ -4,11 +4,11 @@ from gpiozero import Button
 from rotary import Rotary
 
 # --- Configuration des fichiers audio ---
-TONALITE_AUDIO = "tonalite.wav"
+TONALITE_AUDIO = "./RESSOURCEStonalite.wav"
 NUMEROS_AUDIO = {
-    "123": "audio_123.wav",
-    "456": "audio_456.wav",
-    "DEFAULT": "audio_erreur.wav"
+    "1": "./RESSOURCES/test1.mp3",
+    "2": "./RESSOURCES/test2.mp3",
+    "DEFAULT": "./RESSOURCES/audio_erreur.wav"
 }
 
 # --- Configuration du câblage matériel (GPIO) ---
