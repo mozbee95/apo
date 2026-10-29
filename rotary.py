@@ -35,7 +35,7 @@ class Rotary:
         # dernière impulsion reçue : on stocke le chiffre
         with self.lock:
             if 1 <= self.pulse_count <= 10:
-                self.value += str(PULSE_VALUES[self.pulse_count - 1])
+                self.value += str(PULSE_VALUES[self.pulse_count])
             self.pulse_count = 0
             self.compose_timer = threading.Timer(COMPOSE_TIMEOUT, self._on_compose_timeout)
             self.compose_timer.start()
