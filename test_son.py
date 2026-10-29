@@ -11,9 +11,13 @@ try:
     son.play(loops=-1)
     
     # Attend 5 secondes en affichant l'état
-    for i in range(5):
-        print(f"Busy: {pygame.mixer.get_busy()}") # Doit afficher True
-        time.sleep(1)
+    while True:
+        try:
+            print(f"Busy: {pygame.mixer.get_busy()}") # Doit afficher True
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
+        
         
 except Exception as e:
     print(f"Erreur lors de la lecture : {e}")
