@@ -78,8 +78,13 @@ class AsyncTelephoneController:
         if not self.est_decroche:
             print("\n[Téléphone] Combiné décroché ! Lancement de la tonalité.")
             self.est_decroche = True
+            
+            # Forcer l'activation de la tonalité de manière synchrone via l'exécuteur
             if self.son_tonalite:
-                self.canal_tonalite.play(self.son_tonalite, loops=-1)
+                await self.loop.run_in_executor(
+                    None, 
+                    lambda: self.canal_tonalite.play(self.son_tonalite, loops=-1)
+                )
 
     async def raccrocher(self):
         if self.est_decroche:
@@ -90,9 +95,9 @@ class AsyncTelephoneController:
             if self._current_audio_task and not self._current_audio_task.done():
                 self._current_audio_task.cancel()
                 
-            # Arrêt matériel instantané des sorties audio
-            self.canal_tonalite.stop()
-            self.canal_audio.stop()
+            # Forcer l'arrêt matériel synchrone
+            await self.loop.run_in_executor(None, self.canal_tonalite.stop)
+            await self.loop.run_in_executor(None, self.canal_audio.stop)
             
             # Remise à zéro de la mémoire de composition de rotary.py
             with self.rotary.lock:
