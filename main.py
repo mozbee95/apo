@@ -42,15 +42,18 @@ class AsyncTelephoneController:
 
         # --- Initialisation du matériel (GPIO) ---
         # GPIO 17 : Entrée des impulsions du cadran
-        self.bouton_pulse = Button(PIN_ROTARY_PULSE, pull_up=True, bounce_time=0.02)
+        self.bouton_pulse = Button(PIN_ROTARY_PULSE, pull_up=False, bounce_time=0.02)
         self.bouton_pulse.when_pressed = self._on_gpio_pulse
 
         # GPIO 9 : Entrée du commutateur de crochet (Hook)
         # Note : Si le comportement est inversé (tonalité au raccroché), intervertissez simplement 
         # '_thread_safe_decrocher' et '_thread_safe_raccrocher' ci-dessous.
-        self.crochet = Button(PIN_HOOK_SWITCH, pull_up=True, bounce_time=0.05)
-        self.crochet.when_pressed = self._thread_safe_decrocher
-        self.crochet.when_released = self._thread_safe_raccrocher
+        self.crochet = Button(PIN_HOOK_SWITCH, pull_up=False, bounce_time=0.05)
+        self.crochet.when_pressed = self._thread_safe_raccrocher
+        self.crochet.when_released = self._thread_safe_decrocher
+        if self.crochet.is_pressed:
+            # Si le bouton est déjà détecté comme activé selon votre câblage
+            self._thread_safe_decrocher()
 
     # --- Passerelles Thread-Safe (GPIO/Rotary vers Asyncio) ---
     def _on_gpio_pulse(self):
