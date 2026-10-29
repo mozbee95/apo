@@ -4,7 +4,7 @@ from gpiozero import Button
 from rotary import Rotary
 
 # --- Configuration des fichiers audio ---
-TONALITE_AUDIO = "./RESSOURCEStonalite.wav"
+TONALITE_AUDIO = "./RESSOURCES/tonalite.wav"
 NUMEROS_AUDIO = {
     "1": "./RESSOURCES/test1.mp3",
     "2": "./RESSOURCES/test2.mp3",
