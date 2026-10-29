@@ -4,7 +4,7 @@ import threading
 PULSE_TIMEOUT = 0.5    # s : temps max entre deux impulsions d'un même chiffre
 COMPOSE_TIMEOUT = 2.0  # s : temps avant de considérer le numéro complet
 
-PULSE_VALUES = [0, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+PULSE_VALUES = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 
 
 class Rotary:

@@ -7,7 +7,7 @@ from rotary import Rotary
 TONALITE_AUDIO = "./RESSOURCES/tonalite.wav"
 NUMEROS_AUDIO = {
     "1": "./RESSOURCES/test1.mp3",
-    "2": "./RESSOURCES/test1.mp3",
+    "2": "./RESSOURCES/test2.mp3",
     "DEFAULT": "./RESSOURCES/audio_erreur.wav"
 }
 
