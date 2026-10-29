@@ -7,7 +7,7 @@ pygame.mixer.init()
 print("Tentative de lecture forcée de la tonalité pendant 5 secondes...")
 try:
     # Remplacez par le nom exact de votre fichier
-    son = pygame.mixer.Sound("tonalite.wav") 
+    son = pygame.mixer.Sound("./RESSOURCES/tonalite.wav") 
     son.play(loops=-1)
     
     # Attend 5 secondes en affichant l'état
