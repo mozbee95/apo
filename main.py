@@ -48,7 +48,7 @@ class AsyncTelephoneController:
         # GPIO 9 : Entrée du commutateur de crochet (Hook)
         # Note : Si le comportement est inversé (tonalité au raccroché), intervertissez simplement 
         # '_thread_safe_decrocher' et '_thread_safe_raccrocher' ci-dessous.
-        self.crochet = Button(PIN_HOOK_SWITCH, pull_up=True, bounce_time=0.2)
+        self.crochet = Button(PIN_HOOK_SWITCH, pull_up=False, bounce_time=0.2)
         self.crochet.when_pressed = self._thread_safe_decrocher
         self.crochet.when_released = self._thread_safe_raccrocher
         if self.crochet.is_pressed:
