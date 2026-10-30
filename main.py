@@ -3,6 +3,15 @@ import pygame
 from gpiozero import Button
 from rotary import Rotary
 
+# --- Config ALSA ---
+import os
+
+# Forcer l'utilisation d'ALSA natif en mode direct (sans serveur de session)
+os.environ['SDL_AUDIODRIVER'] = 'alsa'
+
+# Optionnel : si le son doit aller sur une carte USB (ex: carte 1), décommentez la ligne suivante :
+# os.environ['AUDIODEV'] = 'hw:1,0' 
+
 # --- Configuration des fichiers audio ---
 TONALITE_AUDIO = "./RESSOURCES/tonalite.wav"
 NUMEROS_AUDIO = {
