@@ -1,5 +1,3 @@
-# Configurer l'autostart du pi
-# a inserer dans /home/pi/.config/autostart
 [Desktop Entry]
 Type=Application
 Name=Projet apo_telephone
