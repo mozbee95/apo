@@ -6,8 +6,12 @@ from rotary import Rotary
 # --- Configuration des fichiers audio ---
 TONALITE_AUDIO = "./RESSOURCES/tonalite.wav"
 NUMEROS_AUDIO = {
-    "1": "./RESSOURCES/test1.mp3",
-    "2": "./RESSOURCES/test2.mp3",
+    "1": "./RESSOURCES/son1.wav",
+    "2": "./RESSOURCES/son2.wav",
+    "3": "./RESSOURCES/son3.wav",
+    "4": "./RESSOURCES/son4.wav",
+    "5": "./RESSOURCES/son5.wav",
+    "6": "./RESSOURCES/son6.wav",
     "DEFAULT": "./RESSOURCES/audio_erreur.wav"
 }
 
