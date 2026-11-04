@@ -4,17 +4,37 @@ import pygame
 from gpiozero import Button
 from rotary2 import Rotary
 
-# --- Configuration des fichiers audio recalibrés ---
+# --- Configuration des fichiers audio (Mappage direct Exact ou avec Parasite) ---
 TONALITE_AUDIO = "./RESSOURCES/tonalite.wav"
 NUMEROS_AUDIO = {
-    "11": "./RESSOURCES/son1.wav",  # 11 impulsions brute = Chiffre 1 -> son1.wav
-    "12": "./RESSOURCES/son2.wav",  # 12 impulsions brute = Chiffre 2 -> son2.wav
-    "13": "./RESSOURCES/son3.wav",  # 13 impulsions brute = Chiffre 3 -> son3.wav
-    "14": "./RESSOURCES/son4.wav",  # 14 impulsions brute = Chiffre 4 -> son4.wav
-    "15": "./RESSOURCES/son5.wav",  # 15 impulsions brute = Chiffre 5 -> son5.wav
-    "16": "./RESSOURCES/son6.wav",  # 16 impulsions brute = Chiffre 6 -> son6.wav
+    # Chiffre 1 : 1 impulsion brute OU 11 avec le parasite du décrochage
+    "1": "./RESSOURCES/son1.wav",
+    "11": "./RESSOURCES/son1.wav",
+    
+    # Chiffre 2 : 2 impulsions brutes OU 12 avec le parasite du décrochage
+    "2": "./RESSOURCES/son2.wav",
+    "12": "./RESSOURCES/son2.wav",
+    
+    # Chiffre 3 : 3 impulsions brutes OU 13 avec le parasite du décrochage
+    "3": "./RESSOURCES/son3.wav",
+    "13": "./RESSOURCES/son3.wav",
+    
+    # Chiffre 4 : 4 impulsions brutes OU 14 avec le parasite du décrochage
+    "4": "./RESSOURCES/son4.wav",
+    "14": "./RESSOURCES/son4.wav",
+    
+    # Chiffre 5 : 5 impulsions brutes OU 15 avec le parasite du décrochage
+    "5": "./RESSOURCES/son5.wav",
+    "15": "./RESSOURCES/son5.wav",
+    
+    # Chiffre 6 : 6 impulsions brutes OU 16 avec le parasite du décrochage
+    "6": "./RESSOURCES/son6.wav",
+    "16": "./RESSOURCES/son6.wav",
+    
+    
     "DEFAULT": "./RESSOURCES/audio_erreur.wav"
 }
+
 
 # --- Affectation des Broches GPIO ---
 PIN_ROTARY_PULSE = 17   # Cadran rotatif
@@ -39,6 +59,7 @@ class AsyncTelephoneController:
         self._current_audio_task = None
 
         self.rotary = Rotary(
+            loop=self.loop,
             on_compose_start=self._thread_safe_compose_start,
             on_compose_end=self._thread_safe_compose_end
         )
@@ -74,13 +95,12 @@ class AsyncTelephoneController:
             print("\n[Téléphone] Combiné décroché ! Lancement de la tonalité.")
             self.est_decroche = True
             
-            with self.rotary.lock:
-                if self.rotary.pulse_timer:
-                    self.rotary.pulse_timer.cancel()
-                if self.rotary.compose_timer:
-                    self.rotary.compose_timer.cancel()
-                self.rotary.value = ""
-                self.rotary.pulse_count = 0
+            if self.rotary._pulse_task and not self.rotary._pulse_task.done():
+                self.rotary._pulse_task.cancel()
+            if self.rotary._compose_task and not self.rotary._compose_task.done():
+                self.rotary._compose_task.cancel()
+            self.rotary.value = ""
+            self.rotary.pulse_count = 0
             
             if self.son_tonalite:
                 await self.loop.run_in_executor(
@@ -99,13 +119,12 @@ class AsyncTelephoneController:
             await self.loop.run_in_executor(None, self.canal_tonalite.stop)
             await self.loop.run_in_executor(None, self.canal_audio.stop)
             
-            with self.rotary.lock:
-                if self.rotary.pulse_timer:
-                    self.rotary.pulse_timer.cancel()
-                if self.rotary.compose_timer:
-                    self.rotary.compose_timer.cancel()
-                self.rotary.value = ""
-                self.rotary.pulse_count = 0
+            if self.rotary._pulse_task and not self.rotary._pulse_task.done():
+                self.rotary._pulse_task.cancel()
+            if self.rotary._compose_task and not self.rotary._compose_task.done():
+                self.rotary._compose_task.cancel()
+            self.rotary.value = ""
+            self.rotary.pulse_count = 0
 
     async def on_composition_start(self):
         if self.est_decroche:
@@ -131,6 +150,7 @@ class AsyncTelephoneController:
             self.canal_audio.play(son)
             print(f"[Lecteur] Début de la lecture : {fichier_path}")
             
+            # Attente asynchrone du signal de fin de piste
             while self.canal_audio.get_busy():
                 await asyncio.sleep(0.1)
                 
@@ -144,7 +164,7 @@ class AsyncTelephoneController:
 async def main():
     controller = AsyncTelephoneController()
     print("==========================================================")
-    print("Système 'APO' paré pour l'exposition.")
+    print("Système 'APO' paré pour l'exposition (Mode Double Mapping).")
     print("Contrôle actif : GPIO 17 (Impulsions) & GPIO 9 (Crochet).")
     print("==========================================================")
     
