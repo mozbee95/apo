@@ -12,6 +12,10 @@ NUMEROS_AUDIO = {
     "4": "./RESSOURCES/son4.wav",
     "5": "./RESSOURCES/son5.wav",
     "6": "./RESSOURCES/son6.wav",
+    "7": "./RESSOURCES/son7.wav",
+    "8": "./RESSOURCES/son8.wav",
+    "9": "./RESSOURCES/son9.wav",
+    "0": "./RESSOURCES/son0.wav",
     "DEFAULT": "./RESSOURCES/audio_erreur.wav"
 }
 

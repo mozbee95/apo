@@ -30,8 +30,23 @@ NUMEROS_AUDIO = {
     # Chiffre 6 : 6 impulsions brutes OU 16 avec le parasite du décrochage
     "6": "./RESSOURCES/son6.wav",
     "16": "./RESSOURCES/son6.wav",
+
+    # Chiffre 7 : 7 impulsions brutes OU 17 avec le parasite du décrochage
+    "7": "./RESSOURCES/son7.wav",
+    "17": "./RESSOURCES/son7.wav",
     
-    
+    # Chiffre 8 : 8 impulsions brutes OU 18 avec le parasite du décrochage
+    "8": "./RESSOURCES/son8.wav",
+    "18": "./RESSOURCES/son8.wav",
+
+    # Chiffre 9 : 9 impulsions brutes OU 19 avec le parasite du décrochage
+    "9": "./RESSOURCES/son9.wav",
+    "19": "./RESSOURCES/son9.wav",
+
+    # Chiffre 0 : 0 impulsions brutes OU 10 avec le parasite du décrochage
+    "0": "./RESSOURCES/son0.wav",
+    "10": "./RESSOURCES/son0.wav",
+
     "DEFAULT": "./RESSOURCES/audio_erreur.wav"
 }
 
