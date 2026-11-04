@@ -50,12 +50,7 @@ class Rotary:
             number = self.value
             self.value = ""
             self.pulse_count = 0
-            
-            # Si une impulsion parasite isolée "1" survient au raccrochage, 
-            # on l'ignore car le S63 ne commence qu'à 2 ou 11 pour le chiffre "1".
-            if number == "1":
-                return
-                
+              
             if number and self.on_compose_end:
                 self.on_compose_end(number)
         except asyncio.CancelledError:

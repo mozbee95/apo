@@ -2,7 +2,7 @@ import asyncio
 import time
 import pygame
 from gpiozero import Button
-from rotary2 import Rotary
+from rotary import Rotary
 
 # --- Configuration des fichiers audio (Mappage direct Exact ou avec Parasite) ---
 TONALITE_AUDIO = "./RESSOURCES/tonalite.wav"
@@ -132,7 +132,10 @@ class AsyncTelephoneController:
             self.canal_tonalite.stop()
 
     async def on_composition_end(self, numero):
+        # Si le combiné est raccroché au moment où le numéro est validé,
+        # ou si c'est une impulsion "1" isolée reçue pendant le raccrochage, on ignore.
         if not self.est_decroche:
+            print(f"[Filtre] Numéro {numero} reçu alors que le téléphone est raccroché -> Ignoré.")
             return
 
         print(f"[Cadran] Composition terminée. Numéro reçu : {numero}")
@@ -143,6 +146,7 @@ class AsyncTelephoneController:
 
         fichier = NUMEROS_AUDIO.get(numero, NUMEROS_AUDIO["DEFAULT"])
         self._current_audio_task = asyncio.create_task(self._jouer_audio_async(fichier))
+
 
     async def _jouer_audio_async(self, fichier_path):
         try:
