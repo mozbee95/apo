@@ -1,50 +1,57 @@
-# test
-import threading
+# rotary.py
+import asyncio
 
 PULSE_TIMEOUT = 0.5    # s : temps max entre deux impulsions d'un même chiffre
 COMPOSE_TIMEOUT = 2.0  # s : temps avant de considérer le numéro complet
 
-PULSE_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
-
+# Table des valeurs brutes d'impulsions
+PULSE_VALUES = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]
 
 class Rotary:
-    def __init__(self, on_compose_start=None, on_compose_end=None):
+    def __init__(self, loop, on_compose_start=None, on_compose_end=None):
+        self.loop = loop
         self.value = ""
         self.pulse_count = 0
-        self.pulse_timer = None
-        self.compose_timer = None
+        self._pulse_task = None
+        self._compose_task = None
         self.on_compose_start = on_compose_start
         self.on_compose_end = on_compose_end
-        self.lock = threading.Lock()
 
     def on_pulse(self):
-        # réception d'une impulsion
-        print("Impulse received")
-        with self.lock:
-            if self.pulse_count == 0 and self.value == "" and self.on_compose_start:
-                self.on_compose_start()
-            self.pulse_count += 1
-            if self.pulse_timer:
-                self.pulse_timer.cancel()
-            if self.compose_timer:
-                self.compose_timer.cancel()
-            self.pulse_timer = threading.Timer(PULSE_TIMEOUT, self._on_pulse_timeout)
-            self.pulse_timer.start()
+        self.loop.call_soon_threadsafe(self._handle_pulse_async)
 
-    def _on_pulse_timeout(self):
-        # dernière impulsion reçue : on stocke le chiffre
-        with self.lock:
-            if 1 <= self.pulse_count <= 10:
+    def _handle_pulse_async(self):
+        if self.pulse_count == 0 and self.value == "" and self.on_compose_start:
+            self.on_compose_start()
+            
+        self.pulse_count += 1
+        
+        if self._pulse_task and not self._pulse_task.done():
+            self._pulse_task.cancel()
+        if self._compose_task and not self._compose_task.done():
+            self._compose_task.cancel()
+            
+        self._pulse_task = asyncio.create_task(self._on_pulse_timeout())
+
+    async def _on_pulse_timeout(self):
+        try:
+            await asyncio.sleep(PULSE_TIMEOUT)
+            if 1 <= self.pulse_count <= len(PULSE_VALUES):
                 self.value += str(PULSE_VALUES[self.pulse_count - 1])
+                
             self.pulse_count = 0
-            self.compose_timer = threading.Timer(COMPOSE_TIMEOUT, self._on_compose_timeout)
-            self.compose_timer.start()
+            self._compose_task = asyncio.create_task(self._on_compose_timeout())
+        except asyncio.CancelledError:
+            pass
 
-    def _on_compose_timeout(self):
-        # fin de composition
-        with self.lock:
+    async def _on_compose_timeout(self):
+        try:
+            await asyncio.sleep(COMPOSE_TIMEOUT)
             number = self.value
             self.value = ""
             self.pulse_count = 0
-        if self.on_compose_end:
-            self.on_compose_end(number)
+              
+            if number and self.on_compose_end:
+                self.on_compose_end(number)
+        except asyncio.CancelledError:
+            pass

@@ -1,23 +1,55 @@
 import asyncio
+import time
 import pygame
 from gpiozero import Button
 from rotary import Rotary
 
-# --- Configuration des fichiers audio ---
+# --- Configuration des fichiers audio (Mappage direct Exact ou avec Parasite) ---
 TONALITE_AUDIO = "./RESSOURCES/tonalite.wav"
 NUMEROS_AUDIO = {
+    # Chiffre 1 : 1 impulsion brute OU 11 avec le parasite du décrochage
     "1": "./RESSOURCES/son1.wav",
+    "11": "./RESSOURCES/son1.wav",
+    
+    # Chiffre 2 : 2 impulsions brutes OU 12 avec le parasite du décrochage
     "2": "./RESSOURCES/son2.wav",
+    "12": "./RESSOURCES/son2.wav",
+    
+    # Chiffre 3 : 3 impulsions brutes OU 13 avec le parasite du décrochage
     "3": "./RESSOURCES/son3.wav",
+    "13": "./RESSOURCES/son3.wav",
+    
+    # Chiffre 4 : 4 impulsions brutes OU 14 avec le parasite du décrochage
     "4": "./RESSOURCES/son4.wav",
+    "14": "./RESSOURCES/son4.wav",
+    
+    # Chiffre 5 : 5 impulsions brutes OU 15 avec le parasite du décrochage
     "5": "./RESSOURCES/son5.wav",
+    "15": "./RESSOURCES/son5.wav",
+    
+    # Chiffre 6 : 6 impulsions brutes OU 16 avec le parasite du décrochage
     "6": "./RESSOURCES/son6.wav",
+    "16": "./RESSOURCES/son6.wav",
+
+    # Chiffre 7 : 7 impulsions brutes OU 17 avec le parasite du décrochage
     "7": "./RESSOURCES/son7.wav",
+    "17": "./RESSOURCES/son7.wav",
+    
+    # Chiffre 8 : 8 impulsions brutes OU 18 avec le parasite du décrochage
     "8": "./RESSOURCES/son8.wav",
+    "18": "./RESSOURCES/son8.wav",
+
+    # Chiffre 9 : 9 impulsions brutes OU 19 avec le parasite du décrochage
     "9": "./RESSOURCES/son9.wav",
+    "19": "./RESSOURCES/son9.wav",
+
+    # Chiffre 0 : 0 impulsions brutes OU 10 avec le parasite du décrochage
     "0": "./RESSOURCES/son0.wav",
+    "10": "./RESSOURCES/son0.wav",
+
     "DEFAULT": "./RESSOURCES/audio_erreur.wav"
 }
+
 
 # --- Affectation des Broches GPIO ---
 PIN_ROTARY_PULSE = 17   # Cadran rotatif
@@ -25,7 +57,6 @@ PIN_HOOK_SWITCH = 9     # Crochet du combiné (Décroché/Raccroché)
 
 class AsyncTelephoneController:
     def __init__(self):
-        # Initialisation robuste du mixeur audio pygame compatible Raspberry Pi OS
         pygame.mixer.pre_init(44100, -16, 2, 2048)
         pygame.mixer.init()
         
@@ -42,30 +73,23 @@ class AsyncTelephoneController:
         self.est_decroche = False
         self._current_audio_task = None
 
-        # Instanciation de votre logique rotary.py originelle
         self.rotary = Rotary(
+            loop=self.loop,
             on_compose_start=self._thread_safe_compose_start,
             on_compose_end=self._thread_safe_compose_end
         )
 
         # --- Initialisation du matériel (GPIO) ---
-        # GPIO 17 : Entrée des impulsions du cadran
         self.bouton_pulse = Button(PIN_ROTARY_PULSE, pull_up=False, bounce_time=0.02)
         self.bouton_pulse.when_pressed = self._on_gpio_pulse
 
-        # GPIO 9 : Entrée du commutateur de crochet (Hook)
-        # Note : Si le comportement est inversé (tonalité au raccroché), intervertissez simplement 
-        # '_thread_safe_decrocher' et '_thread_safe_raccrocher' ci-dessous.
         self.crochet = Button(PIN_HOOK_SWITCH, pull_up=False, bounce_time=0.2)
         self.crochet.when_pressed = self._thread_safe_decrocher
         self.crochet.when_released = self._thread_safe_raccrocher
         if self.crochet.is_pressed:
-            # Si le bouton est déjà détecté comme activé selon votre câblage
             self._thread_safe_decrocher()
 
-    # --- Passerelles Thread-Safe (GPIO/Rotary vers Asyncio) ---
     def _on_gpio_pulse(self):
-        """Transmet l'impulsion physique à votre classe Rotary si le téléphone est décroché."""
         if self.est_decroche:
             self.rotary.on_pulse()
 
@@ -81,13 +105,18 @@ class AsyncTelephoneController:
     def _thread_safe_compose_end(self, numero):
         self.loop.call_soon_threadsafe(lambda: asyncio.create_task(self.on_composition_end(numero)))
 
-    # --- Logique Métier Asynchrone ---
     async def decrocher(self):
         if not self.est_decroche:
             print("\n[Téléphone] Combiné décroché ! Lancement de la tonalité.")
             self.est_decroche = True
             
-            # Forcer l'activation de la tonalité de manière synchrone via l'exécuteur
+            if self.rotary._pulse_task and not self.rotary._pulse_task.done():
+                self.rotary._pulse_task.cancel()
+            if self.rotary._compose_task and not self.rotary._compose_task.done():
+                self.rotary._compose_task.cancel()
+            self.rotary.value = ""
+            self.rotary.pulse_count = 0
+            
             if self.son_tonalite:
                 await self.loop.run_in_executor(
                     None, 
@@ -99,18 +128,18 @@ class AsyncTelephoneController:
             print("\n[Téléphone] Combiné raccroché. Extinction immédiate de tous les sons.")
             self.est_decroche = False
             
-            # Annulation immédiate de la tâche asynchrone de lecture en arrière-plan
             if self._current_audio_task and not self._current_audio_task.done():
                 self._current_audio_task.cancel()
                 
-            # Forcer l'arrêt matériel synchrone
             await self.loop.run_in_executor(None, self.canal_tonalite.stop)
             await self.loop.run_in_executor(None, self.canal_audio.stop)
             
-            # Remise à zéro de la mémoire de composition de rotary.py
-            with self.rotary.lock:
-                self.rotary.value = ""
-                self.rotary.pulse_count = 0
+            if self.rotary._pulse_task and not self.rotary._pulse_task.done():
+                self.rotary._pulse_task.cancel()
+            if self.rotary._compose_task and not self.rotary._compose_task.done():
+                self.rotary._compose_task.cancel()
+            self.rotary.value = ""
+            self.rotary.pulse_count = 0
 
     async def on_composition_start(self):
         if self.est_decroche:
@@ -118,12 +147,14 @@ class AsyncTelephoneController:
             self.canal_tonalite.stop()
 
     async def on_composition_end(self, numero):
+        # Si le combiné est raccroché au moment où le numéro est validé,
+        # ou si c'est une impulsion "1" isolée reçue pendant le raccrochage, on ignore.
         if not self.est_decroche:
+            print(f"[Filtre] Numéro {numero} reçu alors que le téléphone est raccroché -> Ignoré.")
             return
 
         print(f"[Cadran] Composition terminée. Numéro reçu : {numero}")
         
-        # Interrompt l'audio précédent si l'utilisateur recompose un numéro à la volée
         if self._current_audio_task and not self._current_audio_task.done():
             print("[Lecteur] Changement de numéro détecté. Interruption du média précédent...")
             self._current_audio_task.cancel()
@@ -131,13 +162,14 @@ class AsyncTelephoneController:
         fichier = NUMEROS_AUDIO.get(numero, NUMEROS_AUDIO["DEFAULT"])
         self._current_audio_task = asyncio.create_task(self._jouer_audio_async(fichier))
 
+
     async def _jouer_audio_async(self, fichier_path):
         try:
             son = pygame.mixer.Sound(fichier_path)
             self.canal_audio.play(son)
             print(f"[Lecteur] Début de la lecture : {fichier_path}")
             
-            # Attente asynchrone non-bloquante du signal de fin de piste
+            # Attente asynchrone du signal de fin de piste
             while self.canal_audio.get_busy():
                 await asyncio.sleep(0.1)
                 
@@ -151,11 +183,10 @@ class AsyncTelephoneController:
 async def main():
     controller = AsyncTelephoneController()
     print("==========================================================")
-    print("Système 'APO' paré pour l'exposition.")
+    print("Système 'APO' paré pour l'exposition (Mode Double Mapping).")
     print("Contrôle actif : GPIO 17 (Impulsions) & GPIO 9 (Crochet).")
     print("==========================================================")
     
-    # Maintient le programme en arrière-plan sans bloquer les tâches
     while True:
         await asyncio.sleep(3600)
 
